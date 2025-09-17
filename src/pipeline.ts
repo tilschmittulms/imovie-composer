@@ -15,13 +15,12 @@ async function fetchToFile(url: string, destPath: string) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
-  const file = fs.createWriteStream(destPath);
-  await new Promise<void>((resolve, reject) => {
-    res.body?.pipe(file);
-    res.body?.on("error", reject);
-    file.on("finish", () => resolve());
-  });
+
+  // Node 18/20/22-safe: use arrayBuffer, then write
+  const buf = Buffer.from(await res.arrayBuffer());
+  await fs.promises.writeFile(destPath, buf);
 }
+
 
 export async function imageToClip(imagePath: string, output: string, duration = 5) {
   fs.mkdirSync(path.dirname(output), { recursive: true });
