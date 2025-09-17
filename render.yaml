@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: imovie-composer-worker
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: |
+      apt-get update && apt-get install -y ffmpeg
+      npm install
+      npm run build
+    startCommand: node dist/server.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /healthz
